@@ -6,9 +6,8 @@ import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:preference_list/preference_list.dart';
-import 'package:tray_manager/tray_manager.dart';
+import 'package:tray_manager/tray_manager.dart' as tray;
 import 'package:window_manager/window_manager.dart';
-
 import '../utilities/utilities.dart';
 
 const _kSizes = [
@@ -37,7 +36,7 @@ class HomePage extends StatefulWidget {
 const _kIconTypeDefault = 'default';
 const _kIconTypeOriginal = 'original';
 
-class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
+class _HomePageState extends State<HomePage> with tray.TrayListener, WindowListener {
   bool _isPreventClose = false;
   Size _size = _kSizes.first;
   Size? _minSize;
@@ -59,7 +58,7 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
 
   @override
   void initState() {
-    trayManager.addListener(this);
+    tray.trayManager.addListener(this);
     windowManager.addListener(this);
     _init();
     super.initState();
@@ -67,47 +66,42 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
 
   @override
   void dispose() {
-    trayManager.removeListener(this);
+    tray.trayManager.removeListener(this);
     windowManager.removeListener(this);
     super.dispose();
   }
 
   void _init() async {
-    await trayManager.setIcon(
-      Platform.isWindows
-          ? 'images/tray_icon_original.ico'
-          : 'images/tray_icon_original.png',
+    await tray.trayManager.setIcon(
+      Platform.isWindows ? 'images/tray_icon_original.ico' : 'images/tray_icon_original.png',
     );
-    Menu menu = Menu(
+    tray.Menu menu = tray.Menu(
       items: [
-        MenuItem(
+        tray.MenuItem(
           key: 'show_window',
           label: 'Show Window',
         ),
-        MenuItem(
+        tray.MenuItem(
           key: 'set_ignore_mouse_events',
           label: 'setIgnoreMouseEvents(false)',
         ),
-        MenuItem.separator(),
-        MenuItem(
+        tray.MenuItem.separator(),
+        tray.MenuItem(
           key: 'exit_app',
           label: 'Exit App',
         ),
       ],
     );
-    await trayManager.setContextMenu(menu);
+    await tray.trayManager.setContextMenu(menu);
     setState(() {});
   }
 
   void _handleSetIcon(String iconType) async {
     _iconType = iconType;
-    String iconPath =
-        Platform.isWindows ? 'images/tray_icon.ico' : 'images/tray_icon.png';
+    String iconPath = Platform.isWindows ? 'images/tray_icon.ico' : 'images/tray_icon.png';
 
     if (_iconType == 'original') {
-      iconPath = Platform.isWindows
-          ? 'images/tray_icon_original.ico'
-          : 'images/tray_icon_original.png';
+      iconPath = Platform.isWindows ? 'images/tray_icon_original.ico' : 'images/tray_icon_original.png';
     }
 
     await windowManager.setIcon(iconPath);
@@ -122,16 +116,11 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
               title: const Text('ThemeMode'),
               detailText: Text('${sharedConfig.themeMode}'),
               onTap: () async {
-                ThemeMode newThemeMode =
-                    sharedConfig.themeMode == ThemeMode.light
-                        ? ThemeMode.dark
-                        : ThemeMode.light;
+                ThemeMode newThemeMode = sharedConfig.themeMode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
 
                 await sharedConfigManager.setThemeMode(newThemeMode);
                 await windowManager.setBrightness(
-                  newThemeMode == ThemeMode.light
-                      ? Brightness.light
-                      : Brightness.dark,
+                  newThemeMode == ThemeMode.light ? Brightness.light : Brightness.dark,
                 );
               },
             ),
@@ -345,8 +334,7 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
                 },
                 isSelected: _kSizes.map((e) => e == _size).toList(),
                 children: <Widget>[
-                  for (var size in _kSizes)
-                    Text(' ${size.width.toInt()}x${size.height.toInt()} '),
+                  for (var size in _kSizes) Text(' ${size.width.toInt()}x${size.height.toInt()} '),
                 ],
               ),
               onTap: () async {
@@ -537,8 +525,7 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
                 },
                 isSelected: _kMinSizes.map((e) => e == _minSize).toList(),
                 children: <Widget>[
-                  for (var size in _kMinSizes)
-                    Text(' ${size.width.toInt()}x${size.height.toInt()} '),
+                  for (var size in _kMinSizes) Text(' ${size.width.toInt()}x${size.height.toInt()} '),
                 ],
               ),
             ),
@@ -552,8 +539,7 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
                 },
                 isSelected: _kMaxSizes.map((e) => e == _maxSize).toList(),
                 children: <Widget>[
-                  for (var size in _kMaxSizes)
-                    Text(' ${size.width.toInt()}x${size.height.toInt()} '),
+                  for (var size in _kMaxSizes) Text(' ${size.width.toInt()}x${size.height.toInt()} '),
                 ],
               ),
             ),
@@ -661,10 +647,17 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
                 BotToast.showText(
                   text: title.toString(),
                 );
-                title =
-                    'window_manager_example - ${DateTime.now().millisecondsSinceEpoch}';
+                title = 'window_manager_example - ${DateTime.now().millisecondsSinceEpoch}';
                 await windowManager.setTitle(title);
               },
+            ),
+            PreferenceListItem(
+              title: const Text('setTitlebarAppearsTransparent'),
+              accessoryView: CupertinoButton(
+                  child: const Text('transparent'),
+                  onPressed: () async {
+                    windowManager.setTitlebarAppearsTransparent(true);
+                  }),
             ),
             PreferenceListItem(
               title: const Text('setTitleBarStyle'),
@@ -926,8 +919,7 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
                           child: GestureDetector(
                             child: const Text('DragToResizeArea'),
                             onTap: () {
-                              BotToast.showText(
-                                  text: 'DragToResizeArea example');
+                              BotToast.showText(text: 'DragToResizeArea example');
                             },
                           ),
                         ),
@@ -969,11 +961,11 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
 
   @override
   void onTrayIconRightMouseDown() {
-    trayManager.popUpContextMenu();
+    tray.trayManager.popUpContextMenu();
   }
 
   @override
-  void onTrayMenuItemClick(MenuItem menuItem) async {
+  void onTrayMenuItemClick(tray.MenuItem menuItem) async {
     switch (menuItem.key) {
       case 'show_window':
         await windowManager.focus();

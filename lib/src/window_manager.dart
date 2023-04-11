@@ -491,6 +491,10 @@ class WindowManager {
     };
     await _channel.invokeMethod('setTitle', arguments);
   }
+  
+  Future<void> setTitlebarAppearsTransparent(bool isTransparent) async{
+    await _channel.invokeMethod('setTitlebarAppearsTransparent',{'isTransparent': isTransparent});
+  }
 
   /// Changes the title bar style of native window.
   Future<void> setTitleBarStyle(

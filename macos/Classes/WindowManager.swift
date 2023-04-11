@@ -336,6 +336,10 @@ public class WindowManager: NSObject, NSWindowDelegate {
         let title: String = args["title"] as! String
         mainWindow.title = title;
     }
+
+    public func setTitlebarAppearsTransparent(_ args: [String: Any]) {
+        mainWindow.titlebarAppearsTransparent = args["isTransparent"] as! Bool
+    }
     
     public func setTitleBarStyle(_ args: [String: Any]) {
         let titleBarStyle: String = args["titleBarStyle"] as! String
