@@ -52,6 +52,7 @@ public class WindowManager: NSObject, NSWindowDelegate {
     private var _isPreventClose: Bool = false
     private var _isMaximized: Bool = false
     private var _isMaximizable: Bool = true
+    private var _titleLabel: NSTextField?
 
     override public init() {
         super.init()
@@ -335,6 +336,9 @@ public class WindowManager: NSObject, NSWindowDelegate {
     public func setTitle(_ args: [String: Any]) {
         let title: String = args["title"] as! String
         mainWindow.title = title;
+        if let lable = _titleLabel {
+            lable.stringValue = title
+        }
     }
     
     public func setTitleColor(_ args:[String: Any]) {
@@ -354,29 +358,33 @@ public class WindowManager: NSObject, NSWindowDelegate {
             }
             let title = mainWindow.title
             mainWindow.titleVisibility = NSWindow.TitleVisibility.hidden
-            var label: NSTextField
-            if #available(macOS 10.12, *) {
-                label = NSTextField(labelWithAttributedString: NSAttributedString(string: title,attributes: [.foregroundColor: color,.font: NSFont.boldSystemFont(ofSize: 12)]))
+            if (_titleLabel == nil) {
+                if #available(macOS 10.12, *) {
+                    _titleLabel = NSTextField(labelWithAttributedString: NSAttributedString(string: title,attributes: [.foregroundColor: color,.font: NSFont.boldSystemFont(ofSize: 12)]))
+                } else {
+                    _titleLabel = NSTextField(frame: CGRect(x: 0, y: (titleBarView.frame.height - 16) / 2.0, width: titleBarView.frame.width, height: 16))
+                    _titleLabel?.stringValue = title
+                    _titleLabel?.textColor = color
+                    _titleLabel?.font = NSFont.boldSystemFont(ofSize: 12)
+                    _titleLabel?.alignment = .center
+                    _titleLabel?.autoresizingMask = [.width,.minXMargin,.maxXMargin]
+                    // Fallback on earlier versions
+                }
+                _titleLabel?.isBezeled = false
+                _titleLabel?.isEditable = false
+                _titleLabel?.isSelectable = false
+                _titleLabel?.drawsBackground = true
+                _titleLabel?.backgroundColor = .clear
+                titleBarView.addSubview(_titleLabel!)
+                if #available(macOS 10.12, *) {
+                    _titleLabel?.translatesAutoresizingMaskIntoConstraints = false
+                    _titleLabel?.centerXAnchor.constraint(equalTo: titleBarView.centerXAnchor).isActive = true
+                    _titleLabel?.centerYAnchor.constraint(equalTo: titleBarView.centerYAnchor).isActive = true
+                }
             } else {
-                label = NSTextField(frame: CGRect(x: 0, y: (titleBarView.frame.height - 16) / 2.0, width: titleBarView.frame.width, height: 16))
-                label.stringValue = title
-                label.textColor = color
-                label.font = NSFont.boldSystemFont(ofSize: 12)
-                label.alignment = .center
-                label.autoresizingMask = [.width,.minXMargin,.maxXMargin]
-                // Fallback on earlier versions
+                _titleLabel?.textColor = color
             }
-            label.isBezeled = false
-            label.isEditable = false
-            label.isSelectable = false
-            label.drawsBackground = true
-            label.backgroundColor = .clear
-            titleBarView.addSubview(label)
-            if #available(macOS 10.12, *) {
-                label.translatesAutoresizingMaskIntoConstraints = false
-                label.centerXAnchor.constraint(equalTo: titleBarView.centerXAnchor).isActive = true
-                label.centerYAnchor.constraint(equalTo: titleBarView.centerYAnchor).isActive = true
-            }
+            
         }
     }
 
