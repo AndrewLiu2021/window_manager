@@ -336,6 +336,49 @@ public class WindowManager: NSObject, NSWindowDelegate {
         let title: String = args["title"] as! String
         mainWindow.title = title;
     }
+    
+    public func setTitleColor(_ args:[String: Any]) {
+        guard let colorStr = args["color"] as? String else {
+            return
+        }
+        let ary = colorStr.components(separatedBy: ",")
+        if ary.count >= 3 {
+            guard let red = ary[0].CGFloatValue(),
+                  let green = ary[1].CGFloatValue(),
+                  let blue = ary[2].CGFloatValue() else {
+                return
+            }
+            let color = NSColor(red: red/255.0, green: green/255.0, blue: blue/255.0, alpha: 1.0)
+            guard let titleBarView: NSView = (mainWindow.standardWindowButton(.closeButton)?.superview)?.superview else {
+                return
+            }
+            let title = mainWindow.title
+            mainWindow.titleVisibility = NSWindow.TitleVisibility.hidden
+            var label: NSTextField
+            if #available(macOS 10.12, *) {
+                label = NSTextField(labelWithAttributedString: NSAttributedString(string: title,attributes: [.foregroundColor: color,.font: NSFont.boldSystemFont(ofSize: 12)]))
+            } else {
+                label = NSTextField(frame: CGRect(x: 0, y: (titleBarView.frame.height - 16) / 2.0, width: titleBarView.frame.width, height: 16))
+                label.stringValue = title
+                label.textColor = color
+                label.font = NSFont.boldSystemFont(ofSize: 12)
+                label.alignment = .center
+                label.autoresizingMask = [.width,.minXMargin,.maxXMargin]
+                // Fallback on earlier versions
+            }
+            label.isBezeled = false
+            label.isEditable = false
+            label.isSelectable = false
+            label.drawsBackground = true
+            label.backgroundColor = .clear
+            titleBarView.addSubview(label)
+            if #available(macOS 10.12, *) {
+                label.translatesAutoresizingMaskIntoConstraints = false
+                label.centerXAnchor.constraint(equalTo: titleBarView.centerXAnchor).isActive = true
+                label.centerYAnchor.constraint(equalTo: titleBarView.centerYAnchor).isActive = true
+            }
+        }
+    }
 
     public func setTitlebarAppearsTransparent(_ args: [String: Any]) {
         mainWindow.titlebarAppearsTransparent = args["isTransparent"] as! Bool
@@ -545,4 +588,14 @@ public class WindowManager: NSObject, NSWindowDelegate {
             onEvent!(eventName)
         }
     }
+}
+
+extension String {
+  func CGFloatValue() -> CGFloat? {
+    guard let doubleValue = Double(self) else {
+      return nil
+    }
+
+    return CGFloat(doubleValue)
+  }
 }

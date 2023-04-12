@@ -194,6 +194,9 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
             windowManager.setTitle(args)
             result(true)
             break
+        case "setTitleColor":
+            windowManager.setTitleColor(args)
+            result(true)
         case "setTitleBarStyle":
             windowManager.setTitleBarStyle(args)
             result(true)

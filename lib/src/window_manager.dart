@@ -37,8 +37,7 @@ class WindowManager {
 
   final MethodChannel _channel = const MethodChannel('window_manager');
 
-  final ObserverList<WindowListener> _listeners =
-      ObserverList<WindowListener>();
+  final ObserverList<WindowListener> _listeners = ObserverList<WindowListener>();
 
   Future<void> _methodCallHandler(MethodCall call) async {
     for (final WindowListener listener in listeners) {
@@ -70,8 +69,7 @@ class WindowManager {
   }
 
   List<WindowListener> get listeners {
-    final List<WindowListener> localListeners =
-        List<WindowListener>.from(_listeners);
+    final List<WindowListener> localListeners = List<WindowListener>.from(_listeners);
     return localListeners;
   }
 
@@ -491,9 +489,16 @@ class WindowManager {
     };
     await _channel.invokeMethod('setTitle', arguments);
   }
-  
-  Future<void> setTitlebarAppearsTransparent(bool isTransparent) async{
-    await _channel.invokeMethod('setTitlebarAppearsTransparent',{'isTransparent': isTransparent});
+
+  Future<void> setTitleColor(Color color) async {
+    final arguments = {
+      'color': [color.red, color.green, color.blue].join(',')
+    };
+    await _channel.invokeMethod('setTitleColor', arguments);
+  }
+
+  Future<void> setTitlebarAppearsTransparent(bool isTransparent) async {
+    await _channel.invokeMethod('setTitlebarAppearsTransparent', {'isTransparent': isTransparent});
   }
 
   /// Changes the title bar style of native window.
@@ -631,18 +636,14 @@ class WindowManager {
       'startResizing',
       {
         'resizeEdge': describeEnum(resizeEdge),
-        'top': resizeEdge == ResizeEdge.top ||
-            resizeEdge == ResizeEdge.topLeft ||
-            resizeEdge == ResizeEdge.topRight,
+        'top': resizeEdge == ResizeEdge.top || resizeEdge == ResizeEdge.topLeft || resizeEdge == ResizeEdge.topRight,
         'bottom': resizeEdge == ResizeEdge.bottom ||
             resizeEdge == ResizeEdge.bottomLeft ||
             resizeEdge == ResizeEdge.bottomRight,
-        'right': resizeEdge == ResizeEdge.right ||
-            resizeEdge == ResizeEdge.topRight ||
-            resizeEdge == ResizeEdge.bottomRight,
-        'left': resizeEdge == ResizeEdge.left ||
-            resizeEdge == ResizeEdge.topLeft ||
-            resizeEdge == ResizeEdge.bottomLeft,
+        'right':
+            resizeEdge == ResizeEdge.right || resizeEdge == ResizeEdge.topRight || resizeEdge == ResizeEdge.bottomRight,
+        'left':
+            resizeEdge == ResizeEdge.left || resizeEdge == ResizeEdge.topLeft || resizeEdge == ResizeEdge.bottomLeft,
       },
     );
   }

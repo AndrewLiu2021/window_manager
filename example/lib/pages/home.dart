@@ -1,5 +1,4 @@
 // ignore_for_file: avoid_print
-
 import 'dart:io';
 
 import 'package:bot_toast/bot_toast.dart';
@@ -649,6 +648,7 @@ class _HomePageState extends State<HomePage> with tray.TrayListener, WindowListe
                 );
                 title = 'window_manager_example - ${DateTime.now().millisecondsSinceEpoch}';
                 await windowManager.setTitle(title);
+                await windowManager.setTitleColor(Colors.red);
               },
             ),
             PreferenceListItem(
